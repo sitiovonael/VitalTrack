@@ -563,7 +563,43 @@ a.link{color:var(--supp);cursor:pointer}
         </div>
       </div>
     </div>
-    <div style="text-align:center;padding:12px;color:var(--muted);font-size:11px">VitalTrack v2.1 · Dados salvos no seu dispositivo</div>
+    <div class="sts">
+      <div class="stt">☁️ Sincronização Automática</div>
+      <div class="stcard">
+        <div style="padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <div>
+            <div class="strl">Status</div>
+            <div class="strsl">Dados iguais em todos os dispositivos</div>
+          </div>
+          <div id="syncStatus" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:12px;background:var(--bg3);color:var(--muted);white-space:nowrap">não configurado</div>
+        </div>
+        <div style="padding:13px 16px;border-bottom:1px solid var(--border)">
+          <div class="strl" style="margin-bottom:4px">URL do Projeto Supabase</div>
+          <div class="strsl" style="margin-bottom:6px">Settings → API → Project URL</div>
+          <input class="ati" style="font-size:12px" type="url" id="syncUrl" placeholder="https://xxxx.supabase.co" oninput="saveSyncCfg()">
+        </div>
+        <div style="padding:13px 16px;border-bottom:1px solid var(--border)">
+          <div class="strl" style="margin-bottom:4px">Anon Key</div>
+          <div class="strsl" style="margin-bottom:6px">Settings → API → anon public</div>
+          <input class="ati" style="font-size:12px" type="text" id="syncAnon" placeholder="eyJhbGciOiJIUzI1NiIs..." oninput="saveSyncCfg()">
+        </div>
+        <div style="padding:13px 16px;border-bottom:1px solid var(--border)">
+          <div class="strl" style="margin-bottom:4px">Chave Pessoal</div>
+          <div class="strsl" style="margin-bottom:6px">Qualquer texto único só seu — anote!</div>
+          <input class="ati" style="font-size:12px" type="text" id="syncKey" placeholder="ex: gabriele2024" oninput="saveSyncCfg()">
+        </div>
+        <div style="padding:10px 16px;display:flex;gap:8px">
+          <button class="bat" style="flex:1;font-size:12px" onclick="cloudPull(true)">⬇ Buscar da nuvem</button>
+          <button class="bat" style="flex:1;font-size:12px;background:var(--bg3);border:1px solid var(--border);color:var(--text)" onclick="cloudPush(true)">⬆ Enviar agora</button>
+        </div>
+        <div style="padding:0 16px 13px;font-size:11px;color:var(--muted);line-height:1.6;border-top:1px solid var(--border);padding-top:10px">
+          💡 Primeiro uso: no Supabase vá em <b>SQL Editor → New query</b>, cole e rode:<br>
+          <code style="background:var(--bg3);padding:3px 7px;border-radius:4px;font-size:10px;display:block;margin:5px 0;line-height:1.7">CREATE TABLE vitaltrack_data (key TEXT PRIMARY KEY, cfg TEXT, logs TEXT, meas TEXT, updated_at TIMESTAMPTZ DEFAULT NOW());<br>ALTER TABLE vitaltrack_data DISABLE ROW LEVEL SECURITY;</code>
+          <a class="link" href="https://supabase.com/dashboard" target="_blank" style="color:var(--primary)">Abrir Supabase Dashboard →</a>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;padding:12px;color:var(--muted);font-size:11px">VitalTrack v2.2 · Dados salvos no seu dispositivo</div>
   </div>
 
 </div>
@@ -740,9 +776,10 @@ function load(key, def) {
 function loadArr(key) {
   try{ const v=localStorage.getItem(key); return v?JSON.parse(v):[]; }catch{return[];}
 }
-function saveCfg(){ localStorage.setItem(SK.cfg,JSON.stringify(cfg)); }
-function saveLogs(){ localStorage.setItem(SK.logs,JSON.stringify(logs)); }
-function saveMeas(){ localStorage.setItem(SK.meas,JSON.stringify(measures)); }
+function saveCfg(){ localStorage.setItem(SK.cfg,JSON.stringify(cfg)); touchUpdated(); schedulePush(); }
+function saveLogs(){ localStorage.setItem(SK.logs,JSON.stringify(logs)); touchUpdated(); schedulePush(); }
+function saveMeas(){ localStorage.setItem(SK.meas,JSON.stringify(measures)); touchUpdated(); schedulePush(); }
+function touchUpdated(){ localStorage.setItem('vt_updated',new Date().toISOString()); }
 
 function todayKey(){ return new Date().toISOString().split('T')[0]; }
 function dateKey(d){ return d.toISOString().split('T')[0]; }
@@ -1326,6 +1363,10 @@ function renderSettings(){
   document.getElementById('sheight').value=cfg.height||'';
   document.getElementById('sgoal').value=cfg.waterGoal;
   document.getElementById('scup').value=cfg.cupSize;
+  document.getElementById('syncUrl').value=cloudUrl;
+  document.getElementById('syncAnon').value=cloudAnon;
+  document.getElementById('syncKey').value=cloudKey;
+  setSyncStatus(cloudUrl&&cloudAnon&&cloudKey?'ok':'none');
   renderSuppTags(); renderMealTags(); renderMTypeTags(); renderFichas();
 }
 function saveName(){ cfg.name=document.getElementById('sname').value; saveCfg();renderHeader(); }
@@ -1418,6 +1459,103 @@ function importData(){
   inp.click();
 }
 
+// ── CLOUD SYNC (Supabase Storage) ─────────────────────
+const _SB_URL  = 'https://ilydhvprqffovclxdcte.supabase.co';
+const _SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlseWRodnBycWZmb3ZjbHhkY3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNDg5NzQsImV4cCI6MjA5MTkyNDk3NH0.nkrIzKf4rkhReJfMx-IPnuinfkPkjj-gj5xNwldQrEA';
+let cloudUrl  = localStorage.getItem('vt_cloud_url')  || _SB_URL;
+let cloudAnon = localStorage.getItem('vt_cloud_anon') || _SB_ANON;
+let cloudKey  = localStorage.getItem('vt_cloud_key')  || '';
+let syncTimer = null, syncing = false;
+
+function getSyncEp(){
+  if(!cloudUrl||!cloudAnon||!cloudKey) return null;
+  return cloudUrl.replace(/\/$/,'')+'/rest/v1/vitaltrack_data';
+}
+function syncHeaders(extra={}){
+  return {'apikey':cloudAnon,'Authorization':'Bearer '+cloudAnon,'Content-Type':'application/json',...extra};
+}
+
+function setSyncStatus(s){
+  const el=document.getElementById('syncStatus'); if(!el)return;
+  const map={
+    ok:     ['✓ sincronizado',    'var(--gut)',    'rgba(4,120,87,0.1)'],
+    syncing:['↻ sincronizando…', 'var(--primary)','rgba(124,58,237,0.1)'],
+    error:  ['✕ erro de conexão', 'var(--danger)', 'rgba(185,28,28,0.1)'],
+    none:   ['não configurado',   'var(--muted)',  'var(--bg3)']
+  };
+  const [t,c,b]=map[s]||map.none;
+  el.textContent=t; el.style.color=c; el.style.background=b;
+}
+
+function saveSyncCfg(){
+  cloudUrl  = document.getElementById('syncUrl').value.trim();
+  cloudAnon = document.getElementById('syncAnon').value.trim();
+  cloudKey  = document.getElementById('syncKey').value.trim();
+  localStorage.setItem('vt_cloud_url',  cloudUrl);
+  localStorage.setItem('vt_cloud_anon', cloudAnon);
+  localStorage.setItem('vt_cloud_key',  cloudKey);
+  setSyncStatus(cloudUrl&&cloudAnon&&cloudKey ? 'ok' : 'none');
+}
+
+function schedulePush(){
+  if(!getSyncEp()) return;
+  clearTimeout(syncTimer);
+  syncTimer=setTimeout(()=>cloudPush(false), 2000);
+}
+
+async function cloudPush(manual=false){
+  const ep=getSyncEp(); if(!ep) return;
+  if(syncing&&!manual) return;
+  syncing=true; setSyncStatus('syncing');
+  try{
+    const body=JSON.stringify([{
+      key: cloudKey.trim(),
+      cfg:  localStorage.getItem(SK.cfg),
+      logs: localStorage.getItem(SK.logs),
+      meas: localStorage.getItem(SK.meas),
+      updated_at: new Date().toISOString()
+    }]);
+    const r=await fetch(ep,{method:'POST',headers:syncHeaders({'Prefer':'resolution=merge-duplicates'}),body});
+    if(!r.ok){ const t=await r.text(); throw new Error(r.status+' '+t); }
+    setSyncStatus('ok');
+    if(manual) alert('✓ Dados enviados para a nuvem!');
+  }catch(e){
+    setSyncStatus('error');
+    if(manual) alert('Erro ao enviar: '+e.message+'\n\nCertifique-se de ter rodado o SQL no Supabase.');
+  }finally{ syncing=false; }
+}
+
+async function cloudPull(manual=false){
+  const ep=getSyncEp();
+  if(!ep){ if(manual)alert('Preencha URL, Anon Key e Chave Pessoal primeiro.'); return; }
+  if(syncing&&!manual) return;
+  syncing=true; setSyncStatus('syncing');
+  try{
+    const r=await fetch(`${ep}?key=eq.${encodeURIComponent(cloudKey.trim())}&select=*`,{headers:syncHeaders()});
+    if(!r.ok){ const t=await r.text(); throw new Error(r.status+' '+t); }
+    const rows=await r.json();
+    if(!rows||!rows.length){
+      setSyncStatus('ok');
+      if(manual) alert('Nuvem ainda vazia.\nFaça "Enviar agora" primeiro no dispositivo principal.');
+      syncing=false; return;
+    }
+    const data=rows[0];
+    const localTs=new Date(localStorage.getItem('vt_updated')||0);
+    const cloudTs=data.updated_at ? new Date(data.updated_at) : new Date(0);
+    if(!manual && cloudTs<=localTs){ setSyncStatus('ok'); syncing=false; return; }
+    if(data.cfg) { localStorage.setItem(SK.cfg,  data.cfg);  cfg={...DCFG,...JSON.parse(data.cfg)}; }
+    if(data.logs){ localStorage.setItem(SK.logs, data.logs); logs=JSON.parse(data.logs); }
+    if(data.meas){ localStorage.setItem(SK.meas, data.meas); measures=JSON.parse(data.meas); }
+    localStorage.setItem('vt_updated', data.updated_at||new Date().toISOString());
+    setSyncStatus('ok');
+    renderHeader(); renderDateNav(); renderAllToday();
+    if(manual){ alert('✓ Dados atualizados da nuvem!'); renderSettings(); }
+  }catch(e){
+    setSyncStatus('error');
+    if(manual) alert('Erro ao buscar: '+e.message);
+  }finally{ syncing=false; }
+}
+
 // ── NAVIGATION ────────────────────────────────────────
 function switchView(v){
   document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
@@ -1441,6 +1579,8 @@ document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',e=>{if(e.
 function init(){
   activeDate=todayKey();
   renderHeader();renderDateNav();renderWater();renderExercises();renderSupplements();renderMeals();renderBodyMetrics();renderGut();
+  // Silent cloud pull on startup — if cloud has newer data, update silently
+  if(getSyncEp()) cloudPull(false);
 }
 init();
 </script>
