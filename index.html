@@ -765,7 +765,7 @@ const DCFG = {
 let cfg = load(SK.cfg, DCFG);
 let logs = load(SK.logs, {});
 let measures = loadArr(SK.meas);
-let activeDate = new Date().toISOString().split('T')[0];
+let activeDate = todayKey();
 let selWater=0, selFicha=null, freeRowCount=0, exTab='musc', selCardioModality='';
 let wChart=null, eChart=null, wgChart=null, fatChart=null, cChart=null;
 let htab='week', ptab='body';
@@ -781,8 +781,8 @@ function saveLogs(){ localStorage.setItem(SK.logs,JSON.stringify(logs)); touchUp
 function saveMeas(){ localStorage.setItem(SK.meas,JSON.stringify(measures)); touchUpdated(); schedulePush(); }
 function touchUpdated(){ localStorage.setItem('vt_updated',new Date().toISOString()); }
 
-function todayKey(){ return new Date().toISOString().split('T')[0]; }
-function dateKey(d){ return d.toISOString().split('T')[0]; }
+function todayKey(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function dateKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function todayLog(){
   const k=todayKey();
   if(!logs[k]) logs[k]={water:0,bowel:null,supplements:{},meals:{},exercises:[],bodyWeight:null,bodyFat:null};
