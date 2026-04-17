@@ -297,6 +297,48 @@ body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSy
 .empty-i{font-size:26px;margin-bottom:5px}
 a.link{color:var(--supp);cursor:pointer}
 
+/* THEME TOGGLE */
+.theme-btn{padding:8px 18px;border-radius:20px;border:2px solid transparent;font-size:12px;font-weight:700;cursor:pointer;transition:all var(--t);font-family:inherit}
+.theme-btn.sel{border-color:var(--primary);transform:scale(1.05);box-shadow:0 2px 12px rgba(0,0,0,0.15)}
+
+/* DARK THEME OVERRIDES */
+:root[data-theme="dark"]{
+  --bg:#060B18;--bg2:#0D1526;--bg3:#111f35;--bgi:#0a1322;
+  --border:rgba(255,255,255,0.07);--borderf:rgba(99,102,241,0.5);
+  --text:#E2E8F0;--muted:#64748B;--dim:#94A3B8;
+  --water:#38BDF8;--waterd:#0EA5E9;--ex:#FB923C;--exd:#EA580C;
+  --supp:#A78BFA;--suppd:#7C3AED;--gut:#34D399;--gutd:#059669;
+  --meal:#F472B6;--mealb:rgba(244,114,182,0.12);
+  --body:#FBBF24;--bodyb:rgba(251,191,36,0.12);
+  --danger:#F87171;--primary:#6366F1;--primaryd:#4F46E5;
+  --cardio:#2DD4BF;--cardiod:#0D9488;
+}
+[data-theme="dark"] .streak{background:linear-gradient(135deg,#FF6B35,#F7931E)!important}
+[data-theme="dark"] .card:hover{box-shadow:0 8px 32px rgba(0,0,0,0.4)!important}
+[data-theme="dark"] .wrb{stroke:rgba(56,189,248,0.15)!important}
+[data-theme="dark"] .wrf{filter:drop-shadow(0 0 5px rgba(56,189,248,0.4))!important}
+[data-theme="dark"] .wcup{border-color:rgba(56,189,248,0.25)!important}
+[data-theme="dark"] .wcup.f{background:rgba(56,189,248,0.18)!important}
+[data-theme="dark"] .wab:hover,[data-theme="dark"] .wab.sel{background:rgba(56,189,248,0.1)!important}
+[data-theme="dark"] .si.ck{border-color:rgba(167,139,250,0.35)!important;background:rgba(167,139,250,0.07)!important}
+[data-theme="dark"] .scb{border-color:rgba(167,139,250,0.35)!important}
+[data-theme="dark"] .mi.ck{border-color:rgba(244,114,182,0.35)!important}
+[data-theme="dark"] .mcb{border-color:rgba(244,114,182,0.35)!important}
+[data-theme="dark"] .bae{background:rgba(251,146,60,0.08)!important;border-color:rgba(251,146,60,0.3)!important}
+[data-theme="dark"] .bae:hover{background:rgba(251,146,60,0.16)!important}
+[data-theme="dark"] .exd-wrap{background:rgba(251,146,60,0.04)!important;border-color:rgba(251,146,60,0.18)!important}
+[data-theme="dark"] .badr{border-color:rgba(251,146,60,0.25)!important}
+[data-theme="dark"] .bm-add{background:rgba(251,191,36,0.08)!important;border-color:rgba(251,191,36,0.3)!important}
+[data-theme="dark"] .body-inp-row:focus-within{border-color:rgba(251,191,36,0.4)!important}
+[data-theme="dark"] .body-val::placeholder{color:rgba(251,191,36,0.3)!important}
+[data-theme="dark"] .meas-inp:focus{border-color:rgba(251,191,36,0.5)!important}
+[data-theme="dark"] .meas-inp::placeholder{color:rgba(251,191,36,0.3)!important}
+[data-theme="dark"] #waterSugRow{background:rgba(56,189,248,0.07)!important;border-color:rgba(56,189,248,0.18)!important}
+[data-theme="dark"] .exi-cardio{border-color:rgba(45,212,191,0.22)!important;background:rgba(45,212,191,0.04)!important}
+[data-theme="dark"] .cdg-badge{background:rgba(45,212,191,0.1)!important;border-color:rgba(45,212,191,0.25)!important}
+[data-theme="dark"] .cardio-pill.sel{background:rgba(45,212,191,0.1)!important}
+[data-theme="dark"] .date-nav.past{border-color:rgba(251,191,36,0.3)!important;background:rgba(251,191,36,0.04)!important}
+
 /* DATE NAV */
 .date-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:8px 10px;margin-bottom:10px}
 .date-nav-btn{background:var(--bg3);border:1px solid var(--border);color:var(--dim);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all var(--t);flex-shrink:0;line-height:1}
@@ -476,6 +518,18 @@ a.link{color:var(--supp);cursor:pointer}
 
   <!-- SETTINGS -->
   <div class="view" id="viewSettings">
+    <div class="sts">
+      <div class="stt">Aparência</div>
+      <div class="stcard">
+        <div class="strow" style="justify-content:space-between">
+          <div><div class="strl">Tema</div><div class="strsl">Escolha o visual do app</div></div>
+          <div style="display:flex;gap:8px">
+            <button class="theme-btn" id="btnThemeLavender" data-theme="lavender" onclick="setTheme('lavender')" style="background:#EEE8FF;color:#1E0A4E">🌸 Lavanda</button>
+            <button class="theme-btn" id="btnThemeDark" data-theme="dark" onclick="setTheme('dark')" style="background:#0D1526;color:#E2E8F0">🌙 Dark</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="sts">
       <div class="stt">Perfil</div>
       <div class="stcard">
@@ -908,7 +962,10 @@ function renderWater(){
   const ring=document.getElementById('wrf');
   ring.style.strokeDasharray=circ;
   ring.style.strokeDashoffset=circ-(pct/100)*circ;
-  ring.style.stroke=pct>=100?'#047857':pct>=70?'#0369A1':pct>=40?'#0284C7':'#7C3AED';
+  const dk=document.documentElement.dataset.theme==='dark';
+  ring.style.stroke=dk
+    ?(pct>=100?'#34D399':pct>=70?'#38BDF8':pct>=40?'#60A5FA':'#93C5FD')
+    :(pct>=100?'#047857':pct>=70?'#0369A1':pct>=40?'#0284C7':'#7C3AED');
   const nc=Math.min(12,Math.floor(cfg.waterGoal/cfg.cupSize));
   const fc=Math.min(nc,Math.floor(l.water/cfg.cupSize));
   document.getElementById('wcups').innerHTML=Array.from({length:nc},(_,i)=>
@@ -1325,7 +1382,7 @@ function renderHistory(){
   const wdata=dl.map(d=>d.l.water);
   const edata=dl.map(d=>d.l.exercises.filter(e=>e.type!=='cardio').length);
   const cdata=dl.map(d=>d.l.exercises.filter(e=>e.type==='cardio').reduce((a,e)=>a+(e.duration||0),0));
-  const co={plugins:{legend:{display:false},tooltip:{backgroundColor:'#FAF8FF',borderColor:'rgba(109,40,217,0.2)',borderWidth:1,titleColor:'#4C3575',bodyColor:'#1E0A4E'}},scales:{x:{grid:{color:'rgba(109,40,217,0.06)'},ticks:{color:'#7C6B9E',font:{size:10}}},y:{grid:{color:'rgba(109,40,217,0.06)'},ticks:{color:'#7C6B9E',font:{size:10}}}}};
+  const co=chartOpts();
   if(wChart)wChart.destroy(); if(eChart)eChart.destroy(); if(cChart)cChart.destroy();
   wChart=new Chart(document.getElementById('wChart').getContext('2d'),{type:'bar',data:{labels,datasets:[{data:wdata,backgroundColor:wdata.map(v=>v>=cfg.waterGoal?'rgba(4,120,87,0.55)':'rgba(3,105,161,0.45)'),borderColor:wdata.map(v=>v>=cfg.waterGoal?'#047857':'#0369A1'),borderWidth:2,borderRadius:5}]},options:{...co,plugins:{...co.plugins,tooltip:{...co.plugins.tooltip,callbacks:{label:c=>`${c.raw.toLocaleString('pt-BR')} ml`}}},scales:{...co.scales,y:{...co.scales.y,suggestedMax:cfg.waterGoal*1.2}}}});
   eChart=new Chart(document.getElementById('eChart').getContext('2d'),{type:'bar',data:{labels,datasets:[{data:edata,backgroundColor:'rgba(194,65,12,0.45)',borderColor:'#C2410C',borderWidth:2,borderRadius:5}]},options:{...co,scales:{...co.scales,y:{...co.scales.y,ticks:{...co.scales.y.ticks,stepSize:1}}}}});
@@ -1359,6 +1416,9 @@ function renderCalendar(){
 
 // ── SETTINGS ──────────────────────────────────────────
 function renderSettings(){
+  const t=localStorage.getItem('vt_theme')||'lavender';
+  document.getElementById('btnThemeLavender')?.classList.toggle('sel',t==='lavender');
+  document.getElementById('btnThemeDark')?.classList.toggle('sel',t==='dark');
   document.getElementById('sname').value=cfg.name;
   document.getElementById('sheight').value=cfg.height||'';
   document.getElementById('sgoal').value=cfg.waterGoal;
@@ -1420,6 +1480,27 @@ function addFicha(){ const inp=document.getElementById('nficha'),n=inp.value.tri
 function delFicha(id){ if(!confirm('Excluir esta ficha?'))return; cfg.fichas=cfg.fichas.filter(f=>f.id!==id);saveCfg();renderFichas(); }
 function addFichaEx(fid){ const f=cfg.fichas.find(f=>f.id===fid);if(!f)return; const n=document.getElementById('fen-'+fid).value.trim();if(!n)return; f.exercises.push({name:n,sets:document.getElementById('fes-'+fid).value.trim(),reps:document.getElementById('fer-'+fid).value.trim(),weight:document.getElementById('few-'+fid).value.trim()}); saveCfg();renderFichas();setTimeout(()=>{const el=document.getElementById('fi-'+fid);if(el)el.classList.add('exp');},10); }
 function delFichaEx(fid,i){ const f=cfg.fichas.find(f=>f.id===fid);if(!f)return; f.exercises.splice(i,1);saveCfg();renderFichas();setTimeout(()=>{const el=document.getElementById('fi-'+fid);if(el)el.classList.add('exp');},10); }
+
+// ── THEME ─────────────────────────────────────────────
+function setTheme(name){
+  document.documentElement.dataset.theme = name==='dark'?'dark':'';
+  localStorage.setItem('vt_theme',name);
+  document.getElementById('btnThemeLavender')?.classList.toggle('sel',name==='lavender');
+  document.getElementById('btnThemeDark')?.classList.toggle('sel',name==='dark');
+  renderWater();
+  if(document.getElementById('viewHistory').classList.contains('active')) renderHistory();
+  if(document.getElementById('viewProgress').classList.contains('active') && ptab==='body') renderBodyCharts();
+}
+
+function chartOpts(){
+  const dk=document.documentElement.dataset.theme==='dark';
+  const tt=dk
+    ?{backgroundColor:'#111827',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,titleColor:'#94A3B8',bodyColor:'#E2E8F0'}
+    :{backgroundColor:'#FAF8FF',borderColor:'rgba(109,40,217,0.2)',borderWidth:1,titleColor:'#4C3575',bodyColor:'#1E0A4E'};
+  const gc=dk?'rgba(255,255,255,0.04)':'rgba(109,40,217,0.06)';
+  const tc=dk?'#64748B':'#7C6B9E';
+  return {plugins:{legend:{display:false},tooltip:tt},scales:{x:{grid:{color:gc},ticks:{color:tc,font:{size:10}}},y:{grid:{color:gc},ticks:{color:tc,font:{size:10}}}}};
+}
 
 // ── EXPORT / IMPORT ───────────────────────────────────
 function exportData(){
@@ -1577,6 +1658,8 @@ document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',e=>{if(e.
 
 // ── INIT ──────────────────────────────────────────────
 function init(){
+  const savedTheme=localStorage.getItem('vt_theme')||'lavender';
+  document.documentElement.dataset.theme=savedTheme==='dark'?'dark':'';
   activeDate=todayKey();
   renderHeader();renderDateNav();renderWater();renderExercises();renderSupplements();renderMeals();renderBodyMetrics();renderGut();
   // Silent cloud pull on startup — if cloud has newer data, update silently
